@@ -9,12 +9,13 @@ This project applies GA to solve an optimization problem in a fantasy spots leag
 
 <br> Each player is defined by their skill rating, salary and position (Goalkeeper, Defender, Midfielder or Forward). 
 
-<br> Problem Constraints:
+<br> **Problem Constraints:**
 * Each team must consist of: 1 Goalkeeper (GK), 2 Defenders (DEF), 2 Midfielders (MID) and 2 Forwards (FWD)
 * Each player must be assigned to only one team
 * Each team’s total salary cannot exceed a  750€ million total budget
 <br> If solution is validation those constraints then it is then not a valid solution and the fitness value should reflect that
-
+<br> **Objective**:
+The objective is to minimize the skill imbalance between team. To do so, the balanced league that satisfies all constraints and has the lowest standard deviation of average team skill levels is  created. 
  
 
 
