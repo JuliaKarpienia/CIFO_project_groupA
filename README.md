@@ -2,6 +2,7 @@
 
 ## Sports League Optimization using Genetic Algorithms (GA)
 
+### Problem definition
 This project applies GA to solve an optimization problem in a fantasy spots league setting. The goal is to assign 35 players across 5 teams in a way that ensures:
 * Balanced teams skill levels
 * Valid team formation
