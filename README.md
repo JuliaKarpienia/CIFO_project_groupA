@@ -17,7 +17,7 @@ This project applies GA to solve an optimization problem in a fantasy spots leag
 <br> If solution is validation those constraints then it is then not a valid solution and the fitness value should reflect that
 
 ### **Objective**:
-The objective is to minimize the skill imbalance between team. To do so, the balanced league that satisfies all constraints and has the lowest standard deviation of average team skill levels is  created. 
+The objective is to minimize the skill imbalance between teams. To do so, the balanced league that satisfies all constraints and has the lowest standard deviation of average team skill levels is  created. 
  
 
 
