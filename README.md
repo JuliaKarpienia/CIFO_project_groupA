@@ -12,7 +12,7 @@ This project applies GA to solve an optimization problem in a fantasy spots leag
 * Valid team formation
 * Salary cap compliance.
 
-`<br>` Each player is defined by their skill rating, salary and position (Goalkeeper, Defender, Midfielder or Forward).
+Each player is defined by their skill rating, salary and position (Goalkeeper, Defender, Midfielder or Forward).
 
 ### **Problem Constraints:**
 
@@ -20,7 +20,7 @@ This project applies GA to solve an optimization problem in a fantasy spots leag
 * Each player must be assigned to only one team
 * Each team’s total salary cannot exceed a  750€ million total budget
 
-`<br>` If solution is not satysfying those constraints then it is then not a valid solution and the fitness value should reflect that
+If solution is not satysfying those constraints then it is then not a valid solution and the fitness value should reflect that
 
 ### **Objective**:
 
