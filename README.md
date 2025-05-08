@@ -2,32 +2,35 @@
 
 ## Sports League Optimization using Genetic Algorithms (GA)
 
+Project Report - https://docs.google.com/document/d/1tOCk8Ioo5V9RKBLg4EZaCS4yO8WMUBOjNo7iBk_yAMM/edit?usp=sharing 
+
 ### Problem definition
+
 This project applies GA to solve an optimization problem in a fantasy spots league setting. The goal is to assign 35 players across 5 teams in a way that ensures:
+
 * Balanced teams skill levels
 * Valid team formation
 * Salary cap compliance.
 
-<br> Each player is defined by their skill rating, salary and position (Goalkeeper, Defender, Midfielder or Forward). 
+`<br>` Each player is defined by their skill rating, salary and position (Goalkeeper, Defender, Midfielder or Forward).
 
 ### **Problem Constraints:**
+
 * Each team must consist of: 1 Goalkeeper (GK), 2 Defenders (DEF), 2 Midfielders (MID) and 2 Forwards (FWD)
 * Each player must be assigned to only one team
 * Each team’s total salary cannot exceed a  750€ million total budget
-  
-<br> If solution is not satysfying those constraints then it is then not a valid solution and the fitness value should reflect that
+
+`<br>` If solution is not satysfying those constraints then it is then not a valid solution and the fitness value should reflect that
 
 ### **Objective**:
-The objective is to **minimize** the skill imbalance between teams. To do so, the balanced league that satisfies all constraints and has the lowest standard deviation of average team skill levels is  created. 
- 
 
+The objective is to **minimize** the skill imbalance between teams. To do so, the balanced league that satisfies all constraints and has the lowest standard deviation of average team skill levels is  created.
 
+## Team Members
 
-## Team Members 
-
-| Name              | Student Number | 
-|:------------------|:----------------|
-| Alexandra Pinto   | 20211599        | 
-| Julia Karpienia   | 20240514        | 
-| Steven Carlson  | 20240554   | 
-| Tim Straub | 20240505   | 
+| Name            | Student Number |
+| :-------------- | :------------- |
+| Alexandra Pinto | 20211599       |
+| Julia Karpienia | 20240514       |
+| Steven Carlson  | 20240554       |
+| Tim Straub      | 20240505       |
