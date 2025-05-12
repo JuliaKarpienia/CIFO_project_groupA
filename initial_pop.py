@@ -2,6 +2,7 @@
 import random
 from copy import deepcopy
 import pandas as pd
+import math
 
 def load_players_from_csv(filepath):
 
@@ -69,3 +70,24 @@ def create_initial_population(players, population_size=50, salary_cap=750):
                     population.append(deepcopy(teams))
 
     return population
+
+def calculate_fitness(individual):
+    """
+    Fitness = standard deviation of average skill levels of the 5 teams.
+    Lower standard deviation = better balance.
+    """
+    team_averages = []
+
+    for team in individual: 
+        total_skill = sum(player['skill'] for player in team)
+        average_skill = total_skill/len(team)
+        team_averages.append(average_skill)
+
+    overall_average = sum(team_averages)/len(team_averages)
+
+    variance =  sum((avg - overall_average) ** 2 for avg in team_averages) / len(team_averages)
+    std_deviation = math.sqrt(variance)
+
+    
+
+    return std_deviation
