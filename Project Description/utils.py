@@ -1,90 +1,141 @@
-def binary_standard_mutation(representation: str | list, mut_prob):
+def single_player_swap_2teams(representation, mut_prob):
     """
-    Applies standard binary mutation to a binary string or list representation.
-
-    This function supports both binary strings (e.g., "10101") and binary lists 
-    (e.g., [1, 0, 1, 0, 1]) containing either string characters ("0", "1") or 
-    integers (0, 1). Each gene in the representation is independently flipped 
-    with a given mutation probability, while preserving the original data type 
-    of the genes.
+    Randomly swap two players on different teams of the exact same position. 
+    Assumes Forward 1 is different from Forward 2, etc.
 
     Parameters:
-        representation (str or list): The binary representation to mutate.
-        mut_prob (float): The probability of flipping each gene.
-
-    Returns:
-        str or list: A new mutated representation of the same type as the input.
-
-    Raises:
-        ValueError: If the input contains elements other than 0, 1, "0", or "1".
-    """
-
-    # Initialize new representation as a copy of current representation
-    new_representation = deepcopy(representation)
-
-    if random.random() <= mut_prob:
-        # Strings are not mutable. Let's convert temporarily to a list
-        if isinstance(representation, str):
-            new_representation = list(new_representation)
-
-        for char_ix, char in enumerate(representation):
-            if char == "1":
-                new_representation[char_ix] = "0"
-            elif char == 1:
-                new_representation[char_ix] = 0
-            elif char == "0":
-                new_representation[char_ix] = "1"
-            elif char == 0:
-                new_representation[char_ix] = 1
-            else:
-                raise ValueError(f"Invalid character {char}. Can not apply binary standard mutation")
-    
-        # If representation was a string, convert list back to string
-        if isinstance(representation, str):
-            new_representation = "".join(new_representation)
-
-    return new_representation
-
-def swap_mutation(representation, mut_prob):
-    """
-    Applies swap mutation to a solution representation with a given probability.
-
-    Swap mutation randomly selects two different positions (genes) in the 
-    representation and swaps their values. This operator is commonly used for 
-    permutation-based representations but works for any list or string.
-
-    The function preserves the type of the input representation: if the input is 
-    a string, the output will also be a string; if it's a list, the output will 
-    remain a list.
-
-    Parameters:
-        representation (str or list): The solution to mutate.
+        representation (2D numpy array): The solution to mutate.
         mut_prob (float): The probability of performing the swap mutation.
 
     Returns:
-        str or list: A new solution with two genes swapped, of the same type as the input.
+        A 2D numpy array: A new solution with two players of the same position swapped.
     """
 
-    # Strings are not mutable. Let's convert to list first
-    if isinstance(representation, str):
-        new_representation = deepcopy(list(representation))
-    elif isinstance(representation, list):
-        new_representation = deepcopy(representation)
+   
+    new_representation = deepcopy(representation)
 
     if random.random() <= mut_prob:
-        first_idx = random.randint(0, len(representation) - 1)
+        #Select a random team
+        team1_index = random.randint(0, 4)
 
-        # To guarantee we select two different positions
-        second_idx = first_idx
-        while second_idx == first_idx:
-            second_idx = random.randint(0, len(representation) - 1)
+        #Select a different random team
+        team2_index = random.randint(0, 4)
+        while team2_index == team1_index:
+            team2_index = random.randint(0, 4)
+        
+        #Select a random position on the team
+        position_list = [0, 1, 2, 3, 4, 5, 6]
+        position = random.choice(position_list)
 
-        new_representation[first_idx] = representation[second_idx]
-        new_representation[second_idx] = representation[first_idx]
+        #Perform the swap muatation
+        new_representation[team1_index][position], new_representation[team2_index][position] = \
+        new_representation[team2_index][position], new_representation[team1_index][position]
+    
+    return new_representation
 
 
-    # If representation was a string, convert list back to string
-    if isinstance(representation, str):
-        new_representation = "".join(new_representation)
+
+def full_position_swap_2teams(representation, mut_prob):
+    """
+    Randomly swap all players of a position between two teams. 
+    For example, swap both forwards between two teams.
+    If position is 'GK', this is equivalent to the sinlge player swap mutation.
+
+    Parameters:
+        representation (2D numpy array): The solution to mutate.
+        mut_prob (float): The probability of performing the swap mutation.
+
+    Returns:
+        A 2D numpy array: A new solution with two players of the same position swapped.
+    """
+
+   
+    new_representation = deepcopy(representation)
+
+    if random.random() <= mut_prob:
+        #Select a random team
+        team1_index = random.randint(0, 4)
+
+        #Select a different random team
+        team2_index = random.randint(0, 4)
+        while team2_index == team1_index:
+            team2_index = random.randint(0, 4)
+        
+        #Select a random position on the team
+        position_list = ['GK', 'DEF', 'MID', 'FWD']
+        position_initial = random.choice(position_list)
+
+        if position_initial == 'GK':
+            position = 0
+            
+            #Perform the swap muatation
+            new_representation[team1_index][position], new_representation[team2_index][position] = \
+            new_representation[team2_index][position], new_representation[team1_index][position]
+        
+        elif position_initial == 'DEF':
+            position1, position2 = 1, 2
+
+            #Perform the swap muatation for all players of the position
+            new_representation[team1_index][position1], new_representation[team2_index][position1] = \
+            new_representation[team2_index][position1], new_representation[team1_index][position1]
+
+            new_representation[team1_index][position2], new_representation[team2_index][position2] = \
+            new_representation[team2_index][position2], new_representation[team1_index][position2]
+        
+        elif position_initial == 'MID':
+            position1, position2 = 3, 4
+
+            #Perform the swap muatation for all players of the position
+            new_representation[team1_index][position1], new_representation[team2_index][position1] = \
+            new_representation[team2_index][position1], new_representation[team1_index][position1]
+
+            new_representation[team1_index][position2], new_representation[team2_index][position2] = \
+            new_representation[team2_index][position2], new_representation[team1_index][position2]
+        
+        elif position_initial == 'FWD':
+            position1, position2 = 5, 6
+            #Perform the swap muatation for all players of the position
+
+            new_representation[team1_index][position1], new_representation[team2_index][position1] = \
+            new_representation[team2_index][position1], new_representation[team1_index][position1]
+
+            new_representation[team1_index][position2], new_representation[team2_index][position2] = \
+            new_representation[team2_index][position2], new_representation[team1_index][position2]
+    
+    return new_representation
+
+
+def single_player_shift_all_teams(representation, mut_prob):
+    """
+    Choose a random position and shift each player of that position to the next team.
+    Assumes Forward 1 is different from Forward 2, etc.
+
+    Parameters:
+        representation (2D numpy array): The solution to mutate.
+        mut_prob (float): The probability of performing the swap mutation.
+
+    Returns:
+        A 2D numpy array: A new solution with two players of the same position swapped.
+    """
+
+   
+    new_representation = deepcopy(representation)
+
+    if random.random() <= mut_prob:
+        #Select a random position on the team
+        position_list = [0, 1, 2, 3, 4, 5, 6]
+        position = random.choice(position_list)
+
+        team1_index = 0
+        team2_index = 1
+        team3_index = 2
+        team4_index = 3
+        team5_index = 4
+
+        #Perform the shift muatation
+        new_representation[team1_index][position], new_representation[team2_index][position], new_representation[team3_index][position], \
+        new_representation[team4_index][position], new_representation[team5_index][position] = \
+        new_representation[team2_index][position], new_representation[team3_index][position], new_representation[team4_index][position], \
+        new_representation[team5_index][position], new_representation[team1_index][position]
     
     return new_representation
