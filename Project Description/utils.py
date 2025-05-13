@@ -1,3 +1,6 @@
+import random
+from copy import deepcopy
+
 def single_player_swap_2teams(representation, mut_prob):
     """
     Randomly swap two players on different teams of the exact same position. 
@@ -139,3 +142,51 @@ def single_player_shift_all_teams(representation, mut_prob):
         new_representation[team5_index][position], new_representation[team1_index][position]
     
     return new_representation
+
+def single_player_shift_all_teams(league: League, mut_prob: float) -> League | None:
+    """
+    Mutation: choose a position, pick one player of that position from each team,
+    and shift them all one team forward (circularly).
+
+    Returns:
+      - A mutated League if the swap succeeds and still validates,
+      - A copy of the original League if no mutation is attempted,
+      - None if the swap was attempted but produced an invalid League.
+    """
+    new_league = deepcopy(league)
+
+    # Skip mutation?
+    if random.random() > mut_prob:
+        return new_league
+
+    # 1) Pick a position
+    position = random.choice(["GK", "DEF", "MID", "FWD"])
+
+    # 2) From each team, pick one player of that position
+    selected_players = []
+    for team in new_league.teams:
+        candidates = [p for p in team.players if p.position == position]
+        # Shouldn’t happen in a valid team, but guard anyway
+        if not candidates:
+            return new_league
+        selected_players.append(random.choice(candidates))
+
+    # 3) Perform the circular shift:
+    #    each team_i loses its selected player and gains the one from team_(i-1)
+    for i, team in enumerate(new_league.teams):
+        leaving = selected_players[i]
+        arriving = selected_players[i - 1]  # Python’s -1 wraps to last team
+
+        # Remove the old player, insert the new one
+        team.players.remove(leaving)
+        team.players.append(arriving)
+
+    # 4) Validate: if anything’s broken, bail out with None
+    try:
+        for team in new_league.teams:
+            team.validate_team()
+        new_league.validate_league()
+    except ValueError:
+        return None
+
+    return new_league
