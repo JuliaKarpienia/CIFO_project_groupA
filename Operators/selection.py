@@ -2,46 +2,7 @@ import random
 from copy import deepcopy
 import numpy as np
 import builtins
-
-# REMOVE AND IMPORT League and Player classes from their respective files
-def calculate_fitness(league):
-    if league is None or not league.is_valid():
-        return 9999
-    return league.get_standard_deviation_of_average_skills()
-
-class League:
-    def __init__(self, teams):
-        self.teams = teams
-        self.validate_league()
-                
-    def validate_league(self):
-        if len(self.teams) != 5:
-            raise ValueError("The league must have exactly 5 teams.")
-
-        player_names = set()
-        for team in self.teams:
-            # Explicitly call team.validate_team()
-            team.validate_team()
-
-            for player in team.players:
-                if player.name in player_names:
-                    raise ValueError(f"Player {player.name} is already in another team.")
-                player_names.add(player.name)
-
-
-    def is_valid(self):
-        try:
-            self.validate_league()
-            return True
-        except ValueError:
-            return False
-
-    def get_standard_deviation_of_average_skills(self):
-        avg_skills = [team.get_average_skill() for team in self.teams]
-        return np.std(avg_skills)
-
-    def __str__(self):
-        return "\n\n".join([str(team) for team in self.teams])
+from population import *
 
 def roulette_selection(population: list[League]) -> League:
     """
