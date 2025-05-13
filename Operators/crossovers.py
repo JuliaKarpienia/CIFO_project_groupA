@@ -1,177 +1,152 @@
 from copy import deepcopy
 import random
-# from Classes import Team, League, Player -- if we agree on changing and using those classes
+from population import *
 
-def crossover_between_teams(league):
+def crossover_swap_whole_position(league1, league2):
     """
-    Perform a crossover between two teams within a league. 
+    Perform a crossover between two leagues by swapping all players of a randomly selected position (GK, DEF, MID, or FWD)
+    between corresponding teams in each league.
 
-    The crossover combines a fixed number of players from each parent team to form two new child teams.
-    The crossover process swaps parts of Team 1 and Team 2, where we take the first 4 players from Team 1
-    and the last 3 players from Team 2 to form the new teams. The original teams in the league are then replaced
-    with the newly formed teams.
-
-    Example:
-    --------
-    Consider the following teams:
-
-    Team 1:
-    - Player A1 (Position: GK)
-    - Player A2 (Position: DEF)
-    - Player A3 (Position: DEF)
-    - Player A4 (Position: MID)
-    - Player A5 (Position: MID)
-    - Player A6 (Position: FWD)
-    - Player A7 (Position: FWD)
-
-    Team 2:
-    - Player B1 (Position: GK)
-    - Player B2 (Position: DEF)
-    - Player B3 (Position: DEF)
-    - Player B4 (Position: MID)
-    - Player B5 (Position: MID)
-    - Player B6 (Position: FWD)
-    - Player B7 (Position: FWD)
-
-    Step 1: Select 4 players from Team 1 (A1, A2, A3, A4) and 3 players from Team 2 (B5, B6, B7).
-
-    Step 2: Combine the selected players to create two new teams:
-    - New Team 1: 
-      - A1 (Position: GK)
-      - A2 (Position: DEF)
-      - A3 (Position: DEF)
-      - A4 (Position: MID)
-      - B5 (Position: MID)
-      - B6 (Position: FWD)
-      - B7 (Position: FWD)
-
-    - New Team 2: 
-      - B1 (Position: GK)
-      - B2 (Position: DEF)
-      - B3 (Position: DEF)
-      - B4 (Position: MID)
-      - A5 (Position: MID)
-      - A6 (Position: FWD)
-      - A7 (Position: FWD)
-
-    Step 3: Replace the original teams in the league with the newly created teams.
-
-    Step 4: Return the updated league with the new child teams.
-
-    Parameters:
-    -----------
-    league : League
-        The league object containing multiple teams.
-
-    Returns:
-    --------
-    League
-        A new league object with the crossover teams, or None if the crossover is invalid.
-    """
-    # Select two random teams from the league
-    team1, team2 = random.sample(league.teams, 2)
-
-    print("Attempting crossover between:")
-    print("Team 1:")
-    for p in team1.players:
-        print(f"{p.name} ({p.position})")
-    print("Team 2:")
-    for p in team2.players:
-        print(f"{p.name} ({p.position})")
-
-    # Try fixed crossover point 
-    # We choose 4 players from team1 and 3 players from team2 since 
-    players1_part = team1.players[:4]
-    players2_part = team2.players[4:]
-
-    new_players1 = players1_part + players2_part
-
-    players2_alt_part = team2.players[:4]
-    players1_alt_part = team1.players[4:]
-    new_players2 = players2_alt_part + players1_alt_part
-
-    try:
-        new_team1 = Team(new_players1)
-        new_team2 = Team(new_players2)
-
-        # Replace original teams in the league
-        child = deepcopy(league)
-        child.teams = [t for t in league.teams if t != team1 and t != team2]
-        child.teams.extend([new_team1, new_team2])
-
-        print("Successful crossover: 4 players from each parent exchanged.")
-        return child
-
-    except ValueError as e:
-        print("Invalid crossover:", str(e))
-        return None
-
-def crossover_between_leagues(parent1, parent2):
-    """
-    Perform a crossover between two leagues by swapping one or more teams between them.
-
-    This crossover process selects a random number of teams (1 or 2) from each league and swaps them.
-    It uses deep copies of the parent leagues to ensure that the original leagues remain unchanged.
+    This crossover selects one position and swaps players in that position between matching teams (i.e., Team 1 of League 1 
+    with Team 1 of League 2, and so on). If a team does not have any players in the selected position, the swap is skipped 
+    for that specific pair of teams.
 
     Example:
     --------
     Consider two parent leagues, Parent 1 and Parent 2, each containing 3 teams:
 
     Parent 1:
-    - Team 1: (Player A1, Player A2, Player A3)
-    - Team 2: (Player B1, Player B2, Player B3)
-    - Team 3: (Player C1, Player C2, Player C3)
+    - Team 1: GK(A1), DEF(A2, A3), MID(A4, A5), FWD(A6, A7)
+    - Team 2: GK(B1), DEF(B2, B3), MID(B4, B5), FWD(B6, B7)
+    - Team 3: GK(C1), DEF(C2, C3), MID(C4, C5), FWD(C6, C7)
 
     Parent 2:
-    - Team 1: (Player D1, Player D2, Player D3)
-    - Team 2: (Player E1, Player E2, Player E3)
-    - Team 3: (Player F1, Player F2, Player F3)
+    - Team 1: GK(D1), DEF(D2, D3), MID(D4, D5), FWD(D6, D7)
+    - Team 2: GK(E1), DEF(E2, E3), MID(E4, E5), FWD(E6, E7)
+    - Team 3: GK(F1), DEF(F2, F3), MID(F4, F5), FWD(F6, F7)
 
-    Step 1: Randomly select how many teams to swap (e.g., 2 teams).
+    Step 1: Randomly select a position (e.g., "DEF")
 
-    Step 2: Randomly select the indices of the teams to swap (e.g., swap Team 1 and Team 2).
+    Step 2: For each pair of teams at the same index, swap their players at that position
 
-    Step 3: After the swap, the child leagues will look like this:
+    Step 3: After the swap, the child leagues will look like this (assuming position "DEF" was chosen):
 
-    Child 1 (after crossover):
-    - Team 1: (Player D1, Player D2, Player D3)
-    - Team 2: (Player E1, Player E2, Player E3)
-    - Team 3: (Player C1, Player C2, Player C3)
-
-    Child 2 (after crossover):
-    - Team 1: (Player A1, Player A2, Player A3)
-    - Team 2: (Player B1, Player B2, Player B3)
-    - Team 3: (Player F1, Player F2, Player F3)
+    Child 1:
+    - Team 1: GK(A1), DEF(D2, D3), MID(A4, A5), FWD(A6, A7)
+    - Team 2: GK(B1), DEF(E2, E3), MID(B4, B5), FWD(B6, B7)
+    - Team 3: GK(C1), DEF(F2, F3), MID(C4, C5), FWD(C6, C7)
+    
+    Child 2:
+    - Team 1: GK(D1), DEF(A2, A3), MID(D4, D5), FWD(D6, D7)
+    - Team 2: GK(E1), DEF(B2, B3), MID(E4, E5), FWD(E6, E7)
+    - Team 3: GK(F1), DEF(C2, C3), MID(F4, F5), FWD(F6, F7)
 
     Parameters:
     -----------
-    parent1 : League
-        The first parent league to swap teams from.
+    league1 : League
+        The first parent league to perform crossover from.
 
-    parent2 : League
-        The second parent league to swap teams from.
+    league2 : League
+        The second parent league to perform crossover from.
 
     Returns:
     --------
     tuple : (League, League)
-        A tuple containing the two child leagues after the crossover. Each child league contains a combination of teams from both parents.
+        A tuple containing the two child leagues after the crossover. Each child league contains a mix of players at the 
+        selected position swapped between corresponding teams.
     """
-    # Deep copy to avoid changing the original parents
-    child1 = deepcopy(parent1)
-    child2 = deepcopy(parent2)
+    # Deep copy leagues to avoid altering the originals
+    child1 = deepcopy(league1)
+    child2 = deepcopy(league2)
 
-    # Choose how many teams to swap 
-    num_teams_to_swap = random.randint(1, min(len(child1.teams), len(child2.teams)))
+    positions = ['GK', 'DEF', 'MID', 'FWD']
+    chosen_pos = random.choice(positions)
+    print(f"Swapping all players at position: {chosen_pos}")
 
-    # Select random team indices to swap
-    indices = random.sample(range(len(child1.teams)), num_teams_to_swap)
+    for t1, t2 in zip(child1.teams, child2.teams):
+        # Get players by position from both teams
+        p1 = [p for p in t1.players if p.position == chosen_pos]
+        p2 = [p for p in t2.players if p.position == chosen_pos]
 
-    print(f"Swapping teams at indices: {indices}")
+        # Skip if either team lacks players at the selected position
+        if not p1 or not p2:
+            print(f"One of the teams lacks players at {chosen_pos}. Skipping swap for this pair.")
+            continue
 
-    for idx in indices:
-        child1.teams[idx], child2.teams[idx] = child2.teams[idx], child1.teams[idx]
+        # Make sure the numbers match, swap only as many players as available in both teams
+        min_len = min(len(p1), len(p2))
 
-    # Print changes for verification
-    print("\nTeam-level crossover complete.\n")
+        # Swap equal number of players for the selected position
+        for i in range(min_len):
+            player1 = p1[i]
+            player2 = p2[i]
 
+            # Replace by identity to avoid name conflicts
+            def replace_player(team, old_p, new_p):
+                team.players = [new_p if p is old_p else p for p in team.players]
+
+            replace_player(t1, player1, player2)
+            replace_player(t2, player2, player1)
+
+    return child1, child2
+
+
+def preset_team_mix_crossover(parent1, parent2):
+    """
+    Performs a deterministic crossover using a fixed team selection pattern from each parent.
+    Ensures that no player appears more than once in the resulting child leagues.
+
+    Pattern:
+    Child 1: Teams 1, 3, 5 from parent1; Teams 2, 4 from parent2
+    Child 2: Teams 1, 3, 5 from parent2; Teams 2, 4 from parent1
+
+    Parameters:
+    -----------
+    parent1 : League
+        First parent league.
+    parent2 : League
+        Second parent league.
+
+    Returns:
+    --------
+    tuple : (League, League)
+        Two new child leagues built from the preset team pattern. If duplicates are found,
+        it raises an error.
+    """
+
+    def build_child(pattern, source1, source2):
+        teams = []
+        for idx in pattern:
+            if idx[0] == 1:
+                teams.append(deepcopy(source1.teams[idx[1]]))
+            else:
+                teams.append(deepcopy(source2.teams[idx[1]]))
+        return League(teams)
+
+    # Define the selection pattern: (source_league, team_index)
+    pattern_child1 = [(1, 0), (2, 1), (1, 2), (2, 3), (1, 4)]
+    pattern_child2 = [(2, 0), (1, 1), (2, 2), (1, 3), (2, 4)]
+
+    child1 = build_child(pattern_child1, parent1, parent2)
+    child2 = build_child(pattern_child2, parent1, parent2)
+
+    # Validate for duplicate players
+    def validate_unique_players(league, child_name):
+        player_names = set()
+        for i, team in enumerate(league.teams):
+            for player in team.players:
+                if player.name in player_names:
+                    raise ValueError(
+                        f"{child_name} is invalid: Duplicate player {player.name} in team {i+1}."
+                    )
+                player_names.add(player.name)
+
+    try:
+        validate_unique_players(child1, "Child 1")
+        validate_unique_players(child2, "Child 2")
+    except ValueError as e:
+        print("Validation failed:", e)
+        return None, None
+
+    print("Preset team mix crossover successful.")
     return child1, child2

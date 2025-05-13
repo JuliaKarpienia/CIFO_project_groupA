@@ -30,7 +30,10 @@ class Team:
         total_salary = sum(player.cost for player in self.players)
         if total_salary > 750:
             raise ValueError(f"Team salary exceeds the cap: {total_salary}M")
-
+        
+    def get_total_salary(self):
+        return sum(player.cost for player in self.players)
+    
     def get_average_skill(self):
         return sum(player.skill for player in self.players) / len(self.players)
 
@@ -64,17 +67,30 @@ class League:
         except ValueError:
             return False
 
-    def get_standard_deviation_of_average_skills(self):
+    def get_skill_std_dev(self):
+        # Calculate average skill for each team
         avg_skills = [team.get_average_skill() for team in self.teams]
+        # Return the standard deviation of the average skill levels of the teams
         return np.std(avg_skills)
 
     def __str__(self):
         return "\n\n".join([str(team) for team in self.teams])
 
 def calculate_fitness(league):
-    if league is None or not league.is_valid():
+    """
+    Calculate fitness for a league (lower is better)
+
+    1. If league is valid (formations, budget, unique players)
+    2. Standard deviation of average skills (our main objective)
+    """
+    try:
+        league.validate_league()
+    except ValueError as e:
+        print(f"Fitness validation failed: {e}")
         return 9999
-    return league.get_standard_deviation_of_average_skills()
+
+    # If it's valid, compute and return the standard deviation of average skills
+    return league.get_skill_std_dev()
 
 def create_valid_team_from_pool(player_pool):
     max_attempts = 100
