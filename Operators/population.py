@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import pandas as pd
 class Player:
     def __init__(self, name, position, skill, cost):
         self.name = name
@@ -142,3 +143,18 @@ def generate_population(players, num_leagues=5):
         league = create_valid_league(players)
         population.append(league)
     return population
+
+def load_players_from_csv(filepath):
+    df = pd.read_csv(filepath)
+    players = []
+
+    for _, row in df.iterrows():
+        player = Player(
+            name=row['Name'],
+            position=row['Position'],
+            skill=int(row['Skill']),
+            cost=float(row['Salary (€M)'])
+        )
+        players.append(player)
+
+    return players
