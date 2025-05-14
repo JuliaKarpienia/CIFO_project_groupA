@@ -91,14 +91,31 @@ def crossover_swap_whole_position(league1, league2):
     return child1, child2
 
 
-def preset_team_mix_crossover(parent1, parent2):
-    """
-    Performs a deterministic crossover using a fixed team selection pattern from each parent.
-    Ensures that no player appears more than once in the resulting child leagues.
+import random
+from copy import deepcopy
 
-    Pattern:
-    Child 1: Teams 1, 3, 5 from parent1; Teams 2, 4 from parent2
-    Child 2: Teams 1, 3, 5 from parent2; Teams 2, 4 from parent1
+def crossover_swap_extreme_player(
+    parent1: League,
+    parent2: League,
+    cross_prob: float
+) -> tuple[League | None, League | None]:
+    """
+    Perform a crossover by swapping the most "extreme" player in a single position-block
+    between two parent leagues, preserving team structure and avoiding duplicates.
+
+    Steps:
+    ------
+    1. With probability (1 - cross_prob), skip crossover and return deep copies of the parents.
+    2. Randomly select one position: 'GK', 'DEF', 'MID', or 'FWD'.
+    3. In each parent league, find the player in that position whose skill deviates most
+       from their team's average skill for that position.
+    4. Swap those two players in-place between the corresponding teams in two new child leagues.
+    5. Validate each child (team structure, unique players, salary cap); return None for any invalid.
+
+    Example:
+    --------
+    If Parent 1's DEF skill deviations are [3.2, 5.1] and Parent 2's are [2.8, 4.9],
+    the defender with deviation 5.1 in Parent 1 and 4.9 in Parent 2 get swapped.
 
     Parameters:
     -----------
@@ -106,47 +123,78 @@ def preset_team_mix_crossover(parent1, parent2):
         First parent league.
     parent2 : League
         Second parent league.
+    cross_prob : float
+        Probability of performing the crossover (0.0 to 1.0).
 
     Returns:
     --------
-    tuple : (League, League)
-        Two new child leagues built from the preset team pattern. If duplicates are found,
-        it raises an error.
+    tuple : (League | None, League | None)
+        A pair of child leagues. Each is either:
+          - A valid League with the two extreme players swapped, or
+          - None, if the crossover led to an invalid league.
     """
+    # 1) Maybe skip
+    if random.random() > cross_prob:
+        return deepcopy(parent1), deepcopy(parent2)
 
-    def build_child(pattern, source1, source2):
-        teams = []
-        for idx in pattern:
-            if idx[0] == 1:
-                teams.append(deepcopy(source1.teams[idx[1]]))
-            else:
-                teams.append(deepcopy(source2.teams[idx[1]]))
-        return League(teams)
+    # 2) Pick position
+    position = random.choice(["GK", "DEF", "MID", "FWD"])
 
-    # Define the selection pattern: (source_league, team_index)
-    pattern_child1 = [(1, 0), (2, 1), (1, 2), (2, 3), (1, 4)]
-    pattern_child2 = [(2, 0), (1, 1), (2, 2), (1, 3), (2, 4)]
+    # 3) Find extreme in each parent
+    def find_extreme(league):
+        best = None  # (team_idx, player, deviation)
+        for ti, team in enumerate(league.teams):
+            block = [p for p in team.players if p.position == position]
+            if not block:
+                continue
+            avg = sum(p.skill for p in block) / len(block)
+            for p in block:
+                dev = abs(p.skill - avg)
+                if best is None or dev > best[2]:
+                    best = (ti, p, dev)
+        return best
 
-    child1 = build_child(pattern_child1, parent1, parent2)
-    child2 = build_child(pattern_child2, parent1, parent2)
-
-    # Validate for duplicate players
-    def validate_unique_players(league, child_name):
-        player_names = set()
-        for i, team in enumerate(league.teams):
-            for player in team.players:
-                if player.name in player_names:
-                    raise ValueError(
-                        f"{child_name} is invalid: Duplicate player {player.name} in team {i+1}."
-                    )
-                player_names.add(player.name)
-
-    try:
-        validate_unique_players(child1, "Child 1")
-        validate_unique_players(child2, "Child 2")
-    except ValueError as e:
-        print("Validation failed:", e)
+    ex1 = find_extreme(parent1)
+    ex2 = find_extreme(parent2)
+    if not ex1 or not ex2:
         return None, None
+    ti1, ply1, _ = ex1
+    ti2, ply2, _ = ex2
 
-    print("Preset team mix crossover successful.")
-    return child1, child2
+    # 4) Clone parents
+    child1, child2 = deepcopy(parent1), deepcopy(parent2)
+
+    # 5) In-place swap in each child to avoid duplicates
+    def swap_in_child(child, pA, pB):
+        # find pA and pB in child
+        locA = next((ti, i)
+                    for ti, team in enumerate(child.teams)
+                    for i, p in enumerate(team.players)
+                    if p.name == pA.name)
+        locB = next((ti, i)
+                    for ti, team in enumerate(child.teams)
+                    for i, p in enumerate(team.players)
+                    if p.name == pB.name)
+        tiA, iA = locA
+        tiB, iB = locB
+        child.teams[tiA].players[iA], child.teams[tiB].players[iB] = \
+            child.teams[tiB].players[iB], child.teams[tiA].players[iA]
+
+    swap_in_child(child1, ply1, ply2)
+    swap_in_child(child2, ply2, ply1)
+
+    # 6) Validate
+    def validate(child):
+        try:
+            for t in child.teams:
+                t.validate_team()
+            child.validate_league()
+            return True
+        except ValueError:
+            return False
+
+    valid1 = validate(child1)
+    valid2 = validate(child2)
+
+    return (child1 if valid1 else None,
+            child2 if valid2 else None)
