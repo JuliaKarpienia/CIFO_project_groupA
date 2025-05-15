@@ -90,14 +90,9 @@ def crossover_swap_whole_position(league1, league2):
 
     return child1, child2
 
-
-import random
-from copy import deepcopy
-
 def crossover_swap_extreme_player(
     parent1: League,
-    parent2: League,
-    cross_prob: float
+    parent2: League
 ) -> tuple[League | None, League | None]:
     """
     Perform a crossover by swapping the most "extreme" player in a single position-block
@@ -133,9 +128,6 @@ def crossover_swap_extreme_player(
           - A valid League with the two extreme players swapped, or
           - None, if the crossover led to an invalid league.
     """
-    # 1) Maybe skip
-    if random.random() > cross_prob:
-        return deepcopy(parent1), deepcopy(parent2)
 
     # 2) Pick position
     position = random.choice(["GK", "DEF", "MID", "FWD"])
