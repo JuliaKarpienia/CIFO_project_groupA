@@ -87,7 +87,7 @@ def calculate_fitness(league):
     try:
         league.validate_league()
     except ValueError as e:
-        print(f"Fitness validation failed: {e}")
+        #print(f"Fitness validation failed: {e}")
         return 9999
 
     # If it's valid, compute and return the standard deviation of average skills

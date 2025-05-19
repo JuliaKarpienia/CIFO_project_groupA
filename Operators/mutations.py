@@ -92,7 +92,7 @@ def single_player_swap_2teams(league: League, mut_prob: float) -> League:
         new_league.validate_league()
     except ValueError:
         # Invalid mutation
-        print("Invalid mutation: returning NONE")
+        #print("Invalid mutation: returning NONE")
         return None
     return new_league
 

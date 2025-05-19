@@ -1,6 +1,6 @@
 from copy import deepcopy
 import random
-from Operators.population import *
+from population import *
 
 def crossover_swap_whole_position(league1, league2):
     """
@@ -61,7 +61,7 @@ def crossover_swap_whole_position(league1, league2):
 
     positions = ['GK', 'DEF', 'MID', 'FWD']
     chosen_pos = random.choice(positions)
-    print(f"Swapping all players at position: {chosen_pos}")
+    #print(f"Swapping all players at position: {chosen_pos}")
 
     for t1, t2 in zip(child1.teams, child2.teams):
         # Get players by position from both teams
@@ -70,7 +70,7 @@ def crossover_swap_whole_position(league1, league2):
 
         # Skip if either team lacks players at the selected position
         if not p1 or not p2:
-            print(f"One of the teams lacks players at {chosen_pos}. Skipping swap for this pair.")
+            #print(f"One of the teams lacks players at {chosen_pos}. Skipping swap for this pair.")
             continue
 
         # Make sure the numbers match, swap only as many players as available in both teams
@@ -237,7 +237,7 @@ def crossover_team(parent1, parent2):
             for player in team.players:
                 if player.name in player_names:
                     raise ValueError(
-                        f"{child_name} is invalid: Duplicate player {player.name} in team {i+1}."
+                        #f"{child_name} is invalid: Duplicate player {player.name} in team {i+1}."
                     )
                 player_names.add(player.name)
 
@@ -245,8 +245,8 @@ def crossover_team(parent1, parent2):
         validate_unique_players(child1, "Child 1")
         validate_unique_players(child2, "Child 2")
     except ValueError as e:
-        print("Validation failed:", e)
+        #print("Validation failed:", e)
         return None, None
 
-    print("Preset team mix crossover successful.")
+    #print("Preset team mix crossover successful.")
     return child1, child2
