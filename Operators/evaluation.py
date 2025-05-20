@@ -1,6 +1,21 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import os 
+
+
+def load_fitness_dfs(folder_path="fitness_logs") -> dict:
+    fitness_dfs = {}
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".csv"):
+            config_label = filename[:-4]  # Remove ".csv" extension
+            file_path = os.path.join(folder_path, filename)
+            df = pd.read_csv(file_path)
+            fitness_dfs[config_label] = df
+
+    return fitness_dfs
+
 
 def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
     sns.set(style="whitegrid", font_scale=1.2)

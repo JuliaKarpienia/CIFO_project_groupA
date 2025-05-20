@@ -62,7 +62,6 @@ def log_run_results(
         )
 
 def run_algorithm(
-    # filepath=r"../Data/players(in).csv",
     filepath,
     log_path="ga_runs.csv",
     POP_SIZE=50,
@@ -144,12 +143,17 @@ def run_algorithm(
     return best_ind, final_fitness, convergence
 
 
-def run_grid_search(param_grid, n_runs=30, max_gen=100, filepath = None, summary_path="ga_summary.csv"):
-    fitness_dfs = {}
+def run_grid_search(param_grid, n_runs=30, max_gen=100, filepath = None, summary_path="ga_summary.csv", output_folder = 'fitness_logs'):
+   
+
+    if Path(summary_path).exists():
+        Path(summary_path).unlink() 
 
     keys = list(param_grid.keys())
     values = (param_grid[key] for key in keys)
     param_combinations = list(product(*values))
+
+    Path(output_folder).mkdir(parents=True, exist_ok=True)
 
     for param_values in tqdm(param_combinations, desc="Grid Search Progress", unit="config"):
         run_params = dict(zip(keys, param_values))
@@ -183,12 +187,15 @@ def run_grid_search(param_grid, n_runs=30, max_gen=100, filepath = None, summary
         # Prepare for convergence plot
         config_label = (
             f"POP={run_params['POP_SIZE']} "
+            # f"GEN={run_params['max_gen']} "
             f"XO={run_params['xo_prob']} "
-            f"MUT={run_params['mut_prob']} "
-            f"{run_params['mutation'].__name__}/{run_params['crossover'].__name__}"
-        )
-        df_curve = pd.DataFrame(all_convergences)
-        fitness_dfs[config_label] = df_curve
+            f"mut_prob={run_params['mut_prob']} "
+            f"mutation={run_params['mutation'].__name__}"
+            f"crossover={run_params['crossover'].__name__}"
+            f"selection_alg={run_params['selection_algorithm'].__name__}"
+)
+        convergence_df = pd.DataFrame(all_convergences)
+        convergence_path = os.path.join(output_folder, f"{config_label}.csv")
+        convergence_df.to_csv(convergence_path, index=False)
 
     print(f"\nSummary saved to: {summary_path}")
-    return fitness_dfs
