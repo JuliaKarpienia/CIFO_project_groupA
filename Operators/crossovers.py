@@ -1,6 +1,6 @@
 from copy import deepcopy
 import random
-from population import *
+from Operators.population import League
 
 def crossover_swap_whole_position(league1, league2):
     """

@@ -2,7 +2,7 @@ import random
 from copy import deepcopy
 import numpy as np
 import builtins
-from population import *
+from Operators.population import League, calculate_fitness
 
 def roulette_selection(population: list[League]) -> League:
     """
