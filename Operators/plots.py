@@ -1,34 +1,30 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
 import pandas as pd
 
-def plot_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
+    sns.set(style="whitegrid", font_scale=1.2)
+    fig, ax = plt.subplots(figsize=(10, 6))
     handles, labels = [], []
 
     for config_name, df in fitness_dfs.items():
-        mean_fitness = df.mean(axis=0)
         median_fitness = df.median(axis=0)
-        
-        line1, = axes[0].plot(mean_fitness.index, mean_fitness.values, label=config_name)
-        axes[1].plot(median_fitness.index, median_fitness.values, label=config_name)
+        x = range(df.shape[1])  # Numeric generations
 
-        handles.append(line1)
+        line, = ax.plot(x, median_fitness.values, label=config_name)
+        handles.append(line)
         labels.append(config_name)
 
-    axes[0].set_title("Mean Fitness Across Generations")
-    axes[1].set_title("Median Fitness Across Generations")
+    ax.set_title("Median Fitness Across Generations")
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("Fitness")
+    ax.grid(True)
 
-    for ax in axes:
-        ax.set_xlabel("Generation")
-        ax.set_ylabel("Fitness")
-        ax.grid(True)
-
-    # Shared boxed legend below
     legend = fig.legend(
         handles,
         labels,
         loc='lower center',
-        bbox_to_anchor=(0.5, -0.15),
+        bbox_to_anchor=(0.5, -0.2),
         ncol=2,
         frameon=True,
         borderpad=1
