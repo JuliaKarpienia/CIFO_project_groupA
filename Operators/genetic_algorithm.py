@@ -190,8 +190,8 @@ def run_grid_search(param_grid, n_runs=30, max_gen=100, filepath = None, summary
             # f"GEN={run_params['max_gen']} "
             f"XO={run_params['xo_prob']} "
             f"mut_prob={run_params['mut_prob']} "
-            f"mutation={run_params['mutation'].__name__}"
-            f"crossover={run_params['crossover'].__name__}"
+            f"mutation={run_params['mutation'].__name__} "
+            f"crossover={run_params['crossover'].__name__} "
             f"selection_alg={run_params['selection_algorithm'].__name__}"
 )
         convergence_df = pd.DataFrame(all_convergences)

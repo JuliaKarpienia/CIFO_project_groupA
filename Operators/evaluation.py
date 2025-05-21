@@ -19,7 +19,7 @@ def load_fitness_dfs(folder_path="fitness_logs") -> dict:
 
 def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
     sns.set(style="whitegrid", font_scale=1.2)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(14, 8))
     handles, labels = [], []
 
     for config_name, df in fitness_dfs.items():
