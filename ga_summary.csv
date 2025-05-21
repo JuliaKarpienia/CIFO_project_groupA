@@ -1,3 +1,3 @@
 POP_SIZE,mut_prob,xo_prob,mutation,crossover,selection_algorithm,median_fitness,mean_fitness,std_fitness,min_fitness,max_fitness
-100,0.1,0.9,single_player_swap_2teams,crossover_swap_whole_position,roulette_selection,0.05714285714285552,0.058801578463592574,0.00893248768127677,0.05714285714285552,0.10690449676496672
-100,0.1,0.9,single_player_swap_2teams,crossover_swap_whole_position,tournament_selection,0.05714285714285552,0.058801578463592574,0.00893248768127677,0.05714285714285552,0.10690449676496672
+100,0.1,0.9,single_player_swap_2teams,crossover_swap_whole_position,roulette_selection,0.05714285714285552,0.05714285714285553,1.3877787807814457e-17,0.05714285714285552,0.05714285714285552
+100,0.1,0.9,single_player_swap_2teams,crossover_swap_whole_position,tournament_selection,0.05714285714285552,0.05714285714285553,1.3877787807814457e-17,0.05714285714285552,0.05714285714285552
