@@ -177,43 +177,6 @@ def plot_top_configs(summary_path="ga_summary.csv",
     plt.show()
 
 
-def plot_final_fitness_boxplot(fitness_folder="fitness_logs", title="Final Fitness Distribution"):
-    data = []
-
-    # Iterate over all saved fitness curves
-    for file in Path(fitness_folder).glob("*.csv"):
-        config_label = file.stem
-        df = pd.read_csv(file)
-
-        # Take the final generation's fitness value from each of the 30 runs
-        final_gen_fitness = df.iloc[:, -1].values
-
-        for value in final_gen_fitness:
-            data.append({
-                'value': value,
-                'group': config_label
-            })
-
-    # Convert to DataFrame
-    df_long = pd.DataFrame(data)
-
-    # Seaborn theme
-    sns.set_theme(style="whitegrid", palette="pastel", font_scale=1.2)
-
-    # Plot
-    plt.figure(figsize=(14, 8))
-    ax = sns.boxplot(x='group', y='value', data=df_long, width=0.5, linewidth=2.5, fliersize=4)
-
-    plt.title(title, fontsize=16)
-    plt.ylabel("Final Fitness (Last Generation)", fontsize=14)
-    plt.xlabel("Configuration", fontsize=14)
-    plt.xticks(rotation=45, ha="right")
-    plt.grid(True, axis='y', linestyle='--', alpha=0.6)
-
-    plt.tight_layout()
-    plt.show()
-
-
 def plot_best_fitness_boxplot(fitness_folder="fitness_logs", title="Best Fitness Distribution (Per Run)"):
     data = []
 
@@ -253,41 +216,6 @@ def plot_best_fitness_boxplot(fitness_folder="fitness_logs", title="Best Fitness
 
 
 # Statistical tests 
-
-# Friedman test on the final fitness from each run 
-def run_friedman_test_on_final_fitness(fitness_dfs: dict):
-    """
-    Run Friedman test across all loaded configurations using final generation fitness
-    from each run (i.e. last column in each CSV).
-    """
-    final_fitnesses = []
-    labels = []
-
-    for config_label, df in fitness_dfs.items():
-        if df.shape[0] != 30:
-            print(f"Skipping {config_label}: only {df.shape[0]} runs (expected 30)")
-            continue
-        final_gen_fitness = df.iloc[:, -1]  # last generation column
-        final_fitnesses.append(final_gen_fitness)
-        labels.append(config_label)
-
-    if len(final_fitnesses) < 2:
-        print("Not enough configurations with valid data to run Friedman test.")
-        return
-
-    # Run the Friedman test
-    stat, p_value = friedmanchisquare(*final_fitnesses)
-
-    print("\nFriedman Test Results:")
-    print(f"Test Statistic: {stat:.4f}")
-    print(f"P-value:        {p_value:.4f}")
-    if p_value < 0.05:
-        print("Significant difference detected between configurations (reject H₀)")
-    else:
-        print("No significant difference detected (fail to reject H₀)")
-
-    return labels, final_fitnesses
-
 
 
 # Running friedman test on best fitness from each run
