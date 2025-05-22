@@ -6,7 +6,6 @@ from pathlib import Path
 from scipy.stats import friedmanchisquare
 
 
-
 # Loading the data from csv files
 
 def load_fitness_logs(folder_path="fitness_logs"):
@@ -28,7 +27,7 @@ def load_fitness_logs(folder_path="fitness_logs"):
 
 def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
     sns.set(style="whitegrid", font_scale=1.2)
-    fig, ax = plt.subplots(figsize=(14, 8))
+    fig, ax = plt.subplots(figsize=(20, 10))
     handles, labels = [], []
 
     for config_name, df in fitness_dfs.items():
@@ -55,7 +54,7 @@ def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
     )
 
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.25)
+    plt.subplots_adjust(bottom=0.1)
     plt.show()
 
 
@@ -117,6 +116,103 @@ def plot_median_fitness_by_operator(folder_path="fitness_logs"):
     plt.legend(title="Selection")
     plt.grid(True)
     plt.show()
+    
+
+def plot_top_configs(summary_path="ga_summary.csv",
+                     fitness_log_folder="fitness_logs",
+                     top_n=5,
+                     metric="median_fitness"):
+    """
+    Plot convergence curves of top configurations based on a selected metric.
+
+    Parameters:
+    - summary_path (str): Path to ga_summary.csv
+    - fitness_log_folder (str): Path to folder with individual convergence .csvs
+    - top_n (int): Number of top configurations to plot
+    - metric (str): One of 'median_fitness', 'mean_fitness', 'std_fitness', 'min_fitness', 'max_fitness'
+    """
+
+    assert metric in ["median_fitness", "mean_fitness", "std_fitness", "min_fitness", "max_fitness"], \
+        f"Invalid metric '{metric}'."
+
+    summary_df = pd.read_csv(summary_path)
+
+    if metric == "std_fitness":
+        top_configs = summary_df.nsmallest(top_n, metric)  # For std, smaller is better
+    else:
+        top_configs = summary_df.nsmallest(top_n, metric)  # For most others, smaller is better
+
+    plt.figure(figsize=(20, 10))
+    handles, labels = [], []
+
+    for _, row in top_configs.iterrows():
+        config_label = (
+            f"POP={row['POP_SIZE']} "
+            f"XO={row['xo_prob']} "
+            f"mut_prob={row['mut_prob']} "
+            f"mutation={row['mutation']} "
+            f"crossover={row['crossover']} "
+            f"selection_alg={row['selection_algorithm']}"
+        )
+
+        filepath = Path(fitness_log_folder) / f"{config_label}.csv"
+        if filepath.exists():
+            df = pd.read_csv(filepath)
+            curve = df.median(axis=0) if metric == "median_fitness" else df.mean(axis=0)
+            line, = plt.plot(curve.values, label=config_label, linewidth=2)
+            handles.append(line)
+            labels.append(config_label)
+        else:
+            print(f"Missing file: {filepath}")
+
+    plt.title(f"{metric.replace('_', ' ').capitalize()} of Top {top_n} Configurations")
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
+    plt.grid(True)
+    plt.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.2),
+               ncol=1 if top_n <= 3 else 2, fontsize="small", frameon=True)
+
+    plt.tight_layout()
+    plt.subplots_adjust(bottom=0.3)
+    plt.show()
+
+
+def plot_final_fitness_boxplot(fitness_folder="fitness_logs", title="Final Fitness Distribution"):
+    data = []
+
+    # Iterate over all saved fitness curves
+    for file in Path(fitness_folder).glob("*.csv"):
+        config_label = file.stem
+        df = pd.read_csv(file)
+
+        # Take the final generation's fitness value from each of the 30 runs
+        final_gen_fitness = df.iloc[:, -1].values
+
+        for value in final_gen_fitness:
+            data.append({
+                'value': value,
+                'group': config_label
+            })
+
+    # Convert to DataFrame
+    df_long = pd.DataFrame(data)
+
+    # Seaborn theme
+    sns.set_theme(style="whitegrid", palette="pastel", font_scale=1.2)
+
+    # Plot
+    plt.figure(figsize=(14, 8))
+    ax = sns.boxplot(x='group', y='value', data=df_long, width=0.5, linewidth=2.5, fliersize=4)
+
+    plt.title(title, fontsize=16)
+    plt.ylabel("Final Fitness (Last Generation)", fontsize=14)
+    plt.xlabel("Configuration", fontsize=14)
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+    plt.tight_layout()
+    plt.show()
+
 
 
 # Statistical tests 
@@ -131,7 +227,7 @@ def run_friedman_test_on_final_fitness(fitness_dfs: dict):
 
     for config_label, df in fitness_dfs.items():
         if df.shape[0] != 30:
-            print(f"⚠️ Skipping {config_label}: only {df.shape[0]} runs (expected 30)")
+            print(f"Skipping {config_label}: only {df.shape[0]} runs (expected 30)")
             continue
         final_gen_fitness = df.iloc[:, -1]  # last generation column
         final_fitnesses.append(final_gen_fitness)
@@ -153,3 +249,6 @@ def run_friedman_test_on_final_fitness(fitness_dfs: dict):
         print("No significant difference detected (fail to reject H₀)")
 
     return labels, final_fitnesses
+
+
+
