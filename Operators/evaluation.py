@@ -323,6 +323,8 @@ def run_friedman_test_on_best_fitness(fitness_dfs: dict):
 
     return labels, best_fitnesses
 
+## Post hoc  - nemenyi test
+
 def run_posthoc_nemenyi_from_best_fitness(labels, best_fitnesses):
     """
     Perform post-hoc Nemenyi test using results from Friedman test (best fitness per run).
@@ -349,3 +351,24 @@ def plot_posthoc_heatmap(posthoc_df, title="Post-hoc Nemenyi Test (p-values)"):
     plt.title(title)
     plt.tight_layout()
     plt.show()
+
+
+def summarize_significant_wins(posthoc_df: pd.DataFrame, alpha=0.05):
+    """
+    Create a summary DataFrame showing how many configurations each one significantly outperforms.
+    
+    Parameters:
+    - posthoc_df: DataFrame of p-values from a post-hoc Nemenyi test
+    - alpha: significance threshold
+
+    Returns:
+    - summary DataFrame sorted by number of wins
+    """
+    summary = pd.DataFrame(index=posthoc_df.index, columns=["Significant Wins"])
+
+    for config in posthoc_df.index:
+        significant_wins = (posthoc_df.loc[config] < alpha).sum()
+        summary.loc[config, "Significant Wins"] = significant_wins
+
+    summary["Significant Wins"] = summary["Significant Wins"].astype(int)
+    return summary.sort_values(by="Significant Wins", ascending=False)
