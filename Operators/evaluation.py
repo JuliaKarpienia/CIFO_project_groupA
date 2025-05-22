@@ -152,7 +152,8 @@ def plot_top_configs(summary_path="ga_summary.csv",
             f"mut_prob={row['mut_prob']} "
             f"mutation={row['mutation']} "
             f"crossover={row['crossover']} "
-            f"selection_alg={row['selection_algorithm']}"
+            f"selection_alg={row['selection_algorithm']} "
+            f"elitism={row['elitism']}"
         )
 
         filepath = Path(fitness_log_folder) / f"{config_label}.csv"
