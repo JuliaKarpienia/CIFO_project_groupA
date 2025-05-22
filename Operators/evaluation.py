@@ -4,7 +4,7 @@ import pandas as pd
 import os 
 from pathlib import Path
 from scipy.stats import friedmanchisquare
-
+import scikit_posthocs as sp
 
 # Loading the data from csv files
 
@@ -214,9 +214,47 @@ def plot_final_fitness_boxplot(fitness_folder="fitness_logs", title="Final Fitne
     plt.show()
 
 
+def plot_best_fitness_boxplot(fitness_folder="fitness_logs", title="Best Fitness Distribution (Per Run)"):
+    data = []
+
+    # Iterate over all saved fitness curves
+    for file in Path(fitness_folder).glob("*.csv"):
+        config_label = file.stem
+        df = pd.read_csv(file)
+
+        # Get the best fitness from each run (i.e. minimum of each row)
+        best_per_run = df.min(axis=1).values
+
+        for value in best_per_run:
+            data.append({
+                'value': value,
+                'group': config_label
+            })
+
+    # Convert to DataFrame
+    df_long = pd.DataFrame(data)
+
+    # Seaborn theme
+    sns.set_theme(style="whitegrid", palette="pastel", font_scale=1.2)
+
+    # Plot
+    plt.figure(figsize=(14, 8))
+    ax = sns.boxplot(x='group', y='value', data=df_long, width=0.5, linewidth=2.5, fliersize=4)
+
+    plt.title(title, fontsize=16)
+    plt.ylabel("Best Fitness Found in Run", fontsize=14)
+    plt.xlabel("Configuration", fontsize=14)
+    plt.xticks(rotation=45, ha="right")
+    plt.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+    plt.tight_layout()
+    plt.show()
+
+
 
 # Statistical tests 
 
+# Friedman test on the final fitness from each run 
 def run_friedman_test_on_final_fitness(fitness_dfs: dict):
     """
     Run Friedman test across all loaded configurations using final generation fitness
@@ -252,3 +290,62 @@ def run_friedman_test_on_final_fitness(fitness_dfs: dict):
 
 
 
+# Running friedman test on best fitness from each run
+def run_friedman_test_on_best_fitness(fitness_dfs: dict):
+    """
+    Run Friedman test across all loaded configurations using the best (lowest) fitness
+    achieved in each run, not just the last generation.
+    """
+    best_fitnesses = []
+    labels = []
+
+    for config_label, df in fitness_dfs.items():
+        if df.shape[0] != 30:
+            print(f"Skipping {config_label}: only {df.shape[0]} runs (expected 30)")
+            continue
+        
+        # Get the best (min) fitness from each run 
+        best_per_run = df.min(axis=1)
+        best_fitnesses.append(best_per_run)
+        labels.append(config_label)
+
+
+    # Run the Friedman test
+    stat, p_value = friedmanchisquare(*best_fitnesses)
+
+    print("\nFriedman Test Results:")
+    print(f"Test Statistic: {stat:.4f}")
+    print(f"P-value:        {p_value:.4f}")
+    if p_value < 0.05:
+        print("Significant difference detected between configurations (reject H₀)")
+    else:
+        print("No significant difference detected (fail to reject H₀)")
+
+    return labels, best_fitnesses
+
+def run_posthoc_nemenyi_from_best_fitness(labels, best_fitnesses):
+    """
+    Perform post-hoc Nemenyi test using results from Friedman test (best fitness per run).
+    """
+
+    # Convert to DataFrame: rows = runs, columns = configurations
+    df_scores = pd.DataFrame({label: scores for label, scores in zip(labels, best_fitnesses)})
+
+    # Run Nemenyi post-hoc test
+    posthoc = sp.posthoc_nemenyi_friedman(df_scores.values)
+
+    # Label the matrix
+    posthoc.index = labels
+    posthoc.columns = labels
+
+    print("\nPost-hoc Nemenyi Test (p-values):")
+    print(posthoc.round(4))
+
+    return posthoc
+
+def plot_posthoc_heatmap(posthoc_df, title="Post-hoc Nemenyi Test (p-values)"):
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(posthoc_df, annot=True, cmap="coolwarm", fmt=".3f", linewidths=0.5)
+    plt.title(title)
+    plt.tight_layout()
+    plt.show()
