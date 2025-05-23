@@ -8,7 +8,7 @@ import scikit_posthocs as sp
 
 # Loading the data from csv files
 
-def load_fitness_logs(folder_path="fitness_logs"):
+def load_fitness_logs(folder_path):
     """
     Load all .csv files from the given folder and organize them into a dictionary
     where keys are configuration names and values are DataFrames (30xN generations).
@@ -63,7 +63,7 @@ def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
     plt.show()
 
 
-def plot_median_fitness_by_operator(folder_path="fitness_logs"):
+def plot_median_fitness_by_operator(folder_path):
     crossover_medians = {}
     mutation_medians = {}
     selection_medians = {}
@@ -122,8 +122,8 @@ def plot_median_fitness_by_operator(folder_path="fitness_logs"):
     plt.show()
     
 
-def plot_top_configs(summary_path="ga_summary.csv",
-                     fitness_log_folder="fitness_logs",
+def plot_top_configs(summary_path,
+                     fitness_log_folder,
                      top_n=5,
                      metric="median_fitness"):
     """
@@ -182,7 +182,7 @@ def plot_top_configs(summary_path="ga_summary.csv",
     plt.show()
 
 
-def plot_best_fitness_boxplot(fitness_folder="fitness_logs", title="Best Fitness Distribution (Per Run)"):
+def plot_best_fitness_boxplot(fitness_folder, title="Best Fitness Distribution (Per Run)"):
     data = []
 
     for file in Path(fitness_folder).glob("*.csv"):
