@@ -8,7 +8,7 @@ import scikit_posthocs as sp
 
 # Loading the data from csv files
 
-def load_fitness_logs(folder_path="fitness_logs"):
+def load_fitness_logs(folder_path):
     """
     Load all .csv files from the given folder and organize them into a dictionary
     where keys are configuration names and values are DataFrames (30xN generations).
@@ -25,14 +25,18 @@ def load_fitness_logs(folder_path="fitness_logs"):
 
 # Plots 
 
-def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
+def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame],ncol=3):
     sns.set(style="whitegrid", font_scale=1.2)
-    fig, ax = plt.subplots(figsize=(20, 10))
+
+    fig = plt.figure(figsize=(22, 20))
+    gs = fig.add_gridspec(nrows=2, ncols=1, height_ratios=[9, 1]) 
+
+    ax = fig.add_subplot(gs[0])
     handles, labels = [], []
 
     for config_name, df in fitness_dfs.items():
         median_fitness = df.median(axis=0)
-        x = range(df.shape[1])  # Numeric generations
+        x = range(df.shape[1])
 
         line, = ax.plot(x, median_fitness.values, label=config_name)
         handles.append(line)
@@ -43,23 +47,23 @@ def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
     ax.set_ylabel("Fitness")
     ax.grid(True)
 
-    legend = fig.legend(
+
+    legend_ax = fig.add_subplot(gs[1])
+    legend_ax.axis('off')  
+    legend_ax.legend(
         handles,
         labels,
-        loc='lower center',
-        bbox_to_anchor=(0.5, -0.2),
-        ncol=2,
+        loc='center',
+        ncol=ncol,  
         frameon=True,
-        borderpad=1
+        fontsize='small'
     )
 
     plt.tight_layout()
-    plt.subplots_adjust(bottom=0.1)
     plt.show()
 
 
-
-def plot_median_fitness_by_operator(folder_path="fitness_logs"):
+def plot_median_fitness_by_operator(folder_path):
     crossover_medians = {}
     mutation_medians = {}
     selection_medians = {}
@@ -69,7 +73,7 @@ def plot_median_fitness_by_operator(folder_path="fitness_logs"):
         df = pd.read_csv(file)
         median_curve = df.median(axis=0).values
 
-        # Extract hyperparameters from filename
+      
         parts = config_name.split()
         crossover = [p.split('=')[1] for p in parts if "crossover" in p][0]
         mutation = [p.split('=')[1] for p in parts if "mutation" in p][0]
@@ -118,8 +122,8 @@ def plot_median_fitness_by_operator(folder_path="fitness_logs"):
     plt.show()
     
 
-def plot_top_configs(summary_path="ga_summary.csv",
-                     fitness_log_folder="fitness_logs",
+def plot_top_configs(summary_path,
+                     fitness_log_folder,
                      top_n=5,
                      metric="median_fitness"):
     """
@@ -138,9 +142,9 @@ def plot_top_configs(summary_path="ga_summary.csv",
     summary_df = pd.read_csv(summary_path)
 
     if metric == "std_fitness":
-        top_configs = summary_df.nsmallest(top_n, metric)  # For std, smaller is better
+        top_configs = summary_df.nsmallest(top_n, metric)  
     else:
-        top_configs = summary_df.nsmallest(top_n, metric)  # For most others, smaller is better
+        top_configs = summary_df.nsmallest(top_n, metric)  
 
     plt.figure(figsize=(20, 10))
     handles, labels = [], []
@@ -178,15 +182,14 @@ def plot_top_configs(summary_path="ga_summary.csv",
     plt.show()
 
 
-def plot_best_fitness_boxplot(fitness_folder="fitness_logs", title="Best Fitness Distribution (Per Run)"):
+def plot_best_fitness_boxplot(fitness_folder, title="Best Fitness Distribution (Per Run)"):
     data = []
 
-    # Iterate over all saved fitness curves
     for file in Path(fitness_folder).glob("*.csv"):
         config_label = file.stem
         df = pd.read_csv(file)
 
-        # Get the best fitness from each run (i.e. minimum of each row)
+
         best_per_run = df.min(axis=1).values
 
         for value in best_per_run:
@@ -195,13 +198,11 @@ def plot_best_fitness_boxplot(fitness_folder="fitness_logs", title="Best Fitness
                 'group': config_label
             })
 
-    # Convert to DataFrame
     df_long = pd.DataFrame(data)
 
-    # Seaborn theme
+
     sns.set_theme(style="whitegrid", palette="pastel", font_scale=1.2)
 
-    # Plot
     plt.figure(figsize=(14, 8))
     ax = sns.boxplot(x='group', y='value', data=df_long, width=0.5, linewidth=2.5, fliersize=4)
 
@@ -301,3 +302,6 @@ def summarize_significant_wins(posthoc_df: pd.DataFrame, alpha=0.05):
 
     summary["Significant Wins"] = summary["Significant Wins"].astype(int)
     return summary.sort_values(by="Significant Wins", ascending=False)
+
+
+
