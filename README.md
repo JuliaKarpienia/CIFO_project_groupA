@@ -62,7 +62,7 @@ The main notebooks coordinate the full experimentation pipeline, including hyper
 
 * `grid_search.ipynb` — This notebook performs a **grid search** over different combinations of genetic algorithm parameters (crossover probabilities, mutation rates, etc.). It uses the final operators and GA implementation to run multiple configurations and logs the performance of each.
 * `evaluation_gs1.ipynb` — Contains the  **analysis of the first grid search (GS1)** . It includes convergence plots, best fitness tracking, and summary statistics to evaluate the performance of each configuration. Initial insights are drawn from early experiments and used to guide further tuning.
-* `evaluation_gs2.ipynb` — A continuation of the evaluation process, focusing on the  **second, more refined grid search (GS2)** . It also provides a deeper statistical analysis, including Friedman and Nemenyi tests to determine significant performance differences across configurations. The best-performing setup is identified based on both effectiveness and robustness.
+* `evaluation_gs2.ipynb` — A continuation of the evaluation process, focusing on the  **probability values**. The best-performing setup is identified based on both effectiveness and robustness.
 
 ## How to Use
 
