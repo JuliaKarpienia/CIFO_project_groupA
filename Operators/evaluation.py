@@ -25,7 +25,7 @@ def load_fitness_logs(folder_path):
 
 # Plots 
 
-def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
+def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame],ncol=3):
     sns.set(style="whitegrid", font_scale=1.2)
 
     fig = plt.figure(figsize=(22, 20))
@@ -54,7 +54,7 @@ def plot_median_fitness_over_gen(fitness_dfs: dict[str, pd.DataFrame]):
         handles,
         labels,
         loc='center',
-        ncol=4,  
+        ncol=ncol,  
         frameon=True,
         fontsize='small'
     )
