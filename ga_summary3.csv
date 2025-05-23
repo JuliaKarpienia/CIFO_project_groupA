@@ -1,2 +1,0 @@
-POP_SIZE,mut_prob,xo_prob,mutation,crossover,selection_algorithm,elitism,median_fitness,mean_fitness,std_fitness,min_fitness,max_fitness
-10,0.1,0.1,full_position_swap_2teams,crossover_swap_extreme_player,roulette_selection,True,0.2457807219155031,0.2511562785904945,0.09502298280936318,0.10690449676496672,0.47294129592133904
